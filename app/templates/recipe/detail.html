@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.title }} - 食譜收藏夾{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 mb-5">
+            {% if recipe.image_url %}
+                <img src="{{ recipe.image_url }}" class="card-img-top" alt="{{ recipe.title }}" style="max-height: 400px; object-fit: cover;">
+            {% endif %}
+            
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="card-title fw-bold">{{ recipe.title }}</h1>
+                    
+                    {% if session.get('user_id') == recipe.user_id %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                管理
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('recipe.edit_recipe', id=recipe.id) }}">編輯</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{{ url_for('recipe.delete_recipe', id=recipe.id) }}" method="POST" onsubmit="return confirm('確定要刪除這份食譜嗎？');">
+                                        <button type="submit" class="dropdown-item text-danger">刪除</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex gap-2 mb-4">
+                    {% if recipe.category %}
+                        <span class="badge bg-info text-dark fs-6">{{ recipe.category }}</span>
+                    {% endif %}
+                    <span class="badge bg-{{ 'success' if recipe.is_public else 'secondary' }} fs-6">
+                        {{ '公開' if recipe.is_public else '私人' }}
+                    </span>
+                    <span class="text-muted ms-auto">建立於 {{ recipe.created_at[:10] }}</span>
+                </div>
+                
+                <h4 class="mt-5 mb-3 border-bottom pb-2">所需食材</h4>
+                <div class="bg-light p-3 rounded mb-4">
+                    {% set ingredients_list = recipe.ingredients.split(',') %}
+                    <ul class="mb-0 fs-5">
+                        {% for ing in ingredients_list %}
+                            {% if ing.strip() %}
+                                <li>{{ ing.strip() }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <h4 class="mt-5 mb-3 border-bottom pb-2">製作步驟</h4>
+                <div class="recipe-steps fs-5 lh-lg" style="white-space: pre-wrap;">{{ recipe.steps }}</div>
+                
+                <div class="mt-5 pt-3 border-top">
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">← 返回上一頁</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

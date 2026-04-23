@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">關鍵字搜尋食譜</h5>
+                <form action="{{ url_for('index.search') }}" method="GET" class="d-flex mt-3">
+                    <input class="form-control me-2" type="search" name="q" placeholder="例如：咖哩、雞肉..." value="{{ search_query or '' }}">
+                    <button class="btn btn-outline-primary" type="submit">搜尋</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mt-3 mt-md-0">
+        <div class="card shadow-sm h-100 border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary">食材組合搜尋</h5>
+                <p class="card-text text-muted small">輸入冰箱剩餘的食材（用逗號分隔），幫你想能煮什麼！</p>
+                <form action="{{ url_for('index.combo_search') }}" method="GET" class="d-flex">
+                    <input class="form-control me-2" type="search" name="ingredients" placeholder="例如：雞肉,洋蔥,紅蘿蔔" value="{{ combo_ingredients|join(',') if combo_ingredients else '' }}">
+                    <button class="btn btn-primary" type="submit">找食譜</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mb-4">
+    {% if search_query %}
+        搜尋結果：「{{ search_query }}」
+    {% elif combo_ingredients %}
+        包含這些食材的食譜：{{ combo_ingredients|join('、') }}
+    {% else %}
+        最新公開食譜
+    {% endif %}
+</h3>
+
+{% if recipes %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for recipe in recipes %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    {% if recipe.image_url %}
+                        <img src="{{ recipe.image_url }}" class="card-img-top" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <span>無圖片</span>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.title }}</h5>
+                        {% if recipe.category %}
+                            <span class="badge bg-info text-dark mb-2">{{ recipe.category }}</span>
+                        {% endif %}
+                        <p class="card-text text-truncate">{{ recipe.ingredients }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('recipe.detail', id=recipe.id) }}" class="btn btn-outline-secondary w-100">查看詳細</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-light text-center py-5" role="alert">
+        <p class="mb-0 text-muted">目前沒有符合的食譜喔！</p>
+    </div>
+{% endif %}
+{% endblock %}
